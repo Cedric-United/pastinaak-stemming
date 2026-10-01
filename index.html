@@ -94,6 +94,9 @@ a { color: var(--accent); }
 .card .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
 
 .final-card { border-color: var(--final); background: var(--final-soft); }
+.notice-card { border-color: var(--chosen); background: var(--chosen-soft); }
+.replace-box { margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--chosen-soft); border: 1px solid var(--chosen); }
+.replace-box p { font-size: 14.5px; }
 .final-list { margin: 10px 0 0; padding-left: 20px; }
 .final-list li { margin: 2px 0; }
 
@@ -250,7 +253,7 @@ td .meta { display: block; color: var(--muted); font-size: 12.5px; }
     <header class="hero">
       <p class="eyebrow">Familie-etentje · Brasserie Pastinaak, Herenthout</p>
       <h1>Welk hoofdgerecht kies jij?</h1>
-      <p class="lede">We mogen met de groep maar <strong>6 hoofdgerechten</strong> kiezen. Duid jouw favoriet aan; de gerechten met de meeste stemmen worden besteld.</p>
+      <p class="lede">We mogen met de groep maar <strong>6 hoofdgerechten</strong> kiezen. Duid jouw favoriet aan. Na de deadline bekijken we samen de resultaten en kiezen we de 6 gerechten.</p>
       <div class="status" id="status" aria-live="polite"></div>
       <p class="nudge" id="nudge" hidden></p>
     </header>
@@ -261,6 +264,10 @@ td .meta { display: block; color: var(--muted); font-size: 12.5px; }
 
     <section class="card final-card" id="final" hidden></section>
 
+    <section class="card notice-card" id="lost" hidden></section>
+
+    <section class="card" id="results" hidden></section>
+
     <section class="card" id="mine" hidden>
       <h2>Gestemd vanop dit toestel</h2>
       <ul class="mine-list" id="mine-list"></ul>
@@ -269,13 +276,20 @@ td .meta { display: block; color: var(--muted); font-size: 12.5px; }
     <section class="card" id="form">
       <label class="field" for="name">Jouw naam</label>
       <input class="input" id="name" type="text" autocomplete="name" maxlength="60" placeholder="bv. Marie Peeters">
-      <p class="hint">Je naam ziet alleen de organisator. De anderen zien enkel welke gerechten al gekozen zijn, niet door wie. Stem je voor iemand anders (bv. een kind of oma)? Vul dan zijn of haar naam in en stem daarna opnieuw voor jezelf.</p>
+      <p class="hint">Je naam ziet alleen de organisator. De anderen zien enkel welke gerechten al gekozen zijn, niet door wie. Alleen je laatste stem telt. Stem je voor iemand anders (bv. een kind of oma)? Vul dan zijn of haar naam in en stem daarna opnieuw voor jezelf.</p>
       <p class="form-msg" id="form-msg" hidden></p>
+      <div class="replace-box" id="replace-box" hidden>
+        <p id="replace-text"></p>
+        <div class="row">
+          <button type="button" class="btn primary" id="replace-yes">Ja, vervang die stem</button>
+          <button type="button" class="btn" id="replace-no">Nee, ik ben iemand anders</button>
+        </div>
+      </div>
     </section>
 
     <section class="card" id="closed" hidden>
       <h2>De stemming is afgesloten</h2>
-      <p class="sub">Bedankt om mee te stemmen. Moet er toch nog iets wijzigen? Laat het de organisator weten.</p>
+      <p class="sub">Bedankt om mee te stemmen. Op basis van de resultaten kiezen we samen de 6 gerechten. Moet er toch nog iets wijzigen? Laat het de organisator weten.</p>
     </section>
 
     <div class="toolbar" role="group" aria-label="Filter">
@@ -392,9 +406,11 @@ const fmtShort = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'shor
 const byName = (a, b) => a.localeCompare(b, 'nl', { sensitivity: 'base' });
 
 function storage(kind) { try { return kind === 'session' ? window.sessionStorage : window.localStorage; } catch { return null; } }
-function sget(k, kind) { try { return storage(kind)?.getItem(k) ?? null; } catch { return null; } }
-function sset(k, v, kind) { try { storage(kind)?.setItem(k, v); } catch { /* privémodus: niet bewaren */ } }
-function sdel(k, kind) { try { storage(kind)?.removeItem(k); } catch { /* idem */ } }
+// De demo krijgt eigen sleutels, zodat ?demo nooit de echte stemgegevens raakt.
+const KEY_PREFIX = DEMO ? 'demo:' : '';
+function sget(k, kind) { try { return storage(kind)?.getItem(KEY_PREFIX + k) ?? null; } catch { return null; } }
+function sset(k, v, kind) { try { storage(kind)?.setItem(KEY_PREFIX + k, v); } catch { /* privémodus: niet bewaren */ } }
+function sdel(k, kind) { try { storage(kind)?.removeItem(KEY_PREFIX + k); } catch { /* idem */ } }
 
 function newToken() {
   const b = new Uint8Array(16);
@@ -432,12 +448,18 @@ const MESSAGES = {
   network: 'Geen verbinding met de stemdatabase. Controleer je internet en probeer opnieuw.',
   not_configured: 'Deze stempagina is nog niet gekoppeld aan een database.',
 };
-function errText(e, name) {
-  if (e && e.code === 'name_taken') {
-    return `Onder de naam “${name}” werd al gestemd vanop een ander toestel. Ben jij dat? Vraag ${ORGANIZER} om je stem aan te passen, of voeg je familienaam toe.`;
-  }
+function errText(e) {
   return MESSAGES[e && e.code] || `Er ging iets mis (${(e && e.code) || 'onbekend'}). Probeer opnieuw.`;
 }
+
+// Namen waarvoor vanop dit toestel gestemd werd. Verdwijnt zo'n naam uit
+// my_votes, dan werd die stem elders vervangen (of door de organisator gewist).
+function localNames() {
+  try { return JSON.parse(sget('pst-names') || '{}') || {}; } catch { return {}; }
+}
+function saveLocalNames(o) { sset('pst-names', JSON.stringify(o)); }
+function rememberName(name) { const o = localNames(); o[norm(name)] = name; saveLocalNames(o); }
+function forgetName(name) { const o = localNames(); delete o[norm(name)]; saveLocalNames(o); }
 
 // ---------------------------------------------------------------------------
 // Backend: Supabase-RPC's, of een nepdatabase in het geheugen met ?demo
@@ -486,21 +508,31 @@ function demo(fn, a) {
   const checkDish = d => { if (!/^[a-z0-9-]{2,40}$/.test(d || '')) throw fail('bad_dish'); };
   const nowIso = new Date().toISOString();
   switch (fn) {
-    case 'get_status':
-      return { deadline: db.deadline, closed, final: db.final, chosen: [...new Set(db.votes.map(v => v.dish))].sort(), voters: db.votes.length, now: nowIso };
+    case 'get_status': {
+      const counts = {};
+      for (const v of db.votes) counts[v.dish] = (counts[v.dish] || 0) + 1;
+      const results = closed
+        ? Object.entries(counts).map(([dish, count]) => ({ dish, count })).sort((x, y) => y.count - x.count || x.dish.localeCompare(y.dish))
+        : null;
+      return { deadline: db.deadline, closed, final: db.final, chosen: Object.keys(counts).sort(), voters: db.votes.length, results, now: nowIso };
+    }
     case 'my_votes':
       return db.votes.filter(v => v.token === a.p_token).map(v => ({ name: v.name, dish: v.dish }));
     case 'cast_vote': {
       if (closed) throw fail('closed');
       checkName(a.p_name); checkDish(a.p_dish);
       const v = db.votes.find(x => x.norm === norm(a.p_name));
-      if (v) {
-        if (v.token !== a.p_token) throw fail('name_taken');
+      if (v && v.token === a.p_token) {
         Object.assign(v, { dish: a.p_dish, name: a.p_name.trim(), updated_at: nowIso });
-      } else {
-        db.votes.push({ id: 'demo-' + Math.random().toString(36).slice(2), name: a.p_name.trim(), norm: norm(a.p_name), dish: a.p_dish, token: a.p_token, by_admin: false, created_at: nowIso, updated_at: nowIso });
+        return { ok: true, replaced: false };
       }
-      return { ok: true };
+      if (v) {
+        if (!a.p_replace) throw fail('name_exists');
+        Object.assign(v, { dish: a.p_dish, name: a.p_name.trim(), token: a.p_token, by_admin: false, replaced_count: (v.replaced_count || 0) + 1, replaced_at: nowIso, updated_at: nowIso });
+        return { ok: true, replaced: true };
+      }
+      db.votes.push({ id: 'demo-' + Math.random().toString(36).slice(2), name: a.p_name.trim(), norm: norm(a.p_name), dish: a.p_dish, token: a.p_token, by_admin: false, created_at: nowIso, updated_at: nowIso });
+      return { ok: true, replaced: false };
     }
     case 'withdraw_vote': {
       if (closed) throw fail('closed');
@@ -510,7 +542,7 @@ function demo(fn, a) {
     }
     case 'admin_data':
       isAdmin();
-      return { deadline: db.deadline, final: db.final, now: nowIso, votes: db.votes.map(v => ({ id: v.id, name: v.name, dish: v.dish, by_admin: v.by_admin, created_at: v.created_at, updated_at: v.updated_at })) };
+      return { deadline: db.deadline, final: db.final, now: nowIso, votes: db.votes.map(v => ({ id: v.id, name: v.name, dish: v.dish, by_admin: v.by_admin, created_at: v.created_at, updated_at: v.updated_at, replaced_count: v.replaced_count || 0, replaced_at: v.replaced_at || null })) };
     case 'admin_set_deadline': isAdmin(); db.deadline = a.p_deadline; return { ok: true };
     case 'admin_set_final': isAdmin(); db.final = a.p_dishes && a.p_dishes.length ? a.p_dishes : null; return { ok: true };
     case 'admin_delete_vote': isAdmin(); db.votes = db.votes.filter(v => v.id !== a.p_id); return { ok: true };
@@ -528,13 +560,18 @@ function demo(fn, a) {
 // ---------------------------------------------------------------------------
 // Stempagina
 // ---------------------------------------------------------------------------
-const state = { status: null, mine: [], selected: null, filter: 'all', busy: false };
+const state = { status: null, mine: [], lost: [], selected: null, filter: 'all', busy: false };
 
 async function loadVoter() {
   try {
     const [status, mine] = await Promise.all([rpc('get_status'), rpc('my_votes', { p_token: TOKEN })]);
     state.status = status;
     state.mine = Array.isArray(mine) ? mine : [];
+    const known = localNames();
+    const current = new Set(state.mine.map(v => norm(v.name)));
+    state.lost = Object.entries(known).filter(([k]) => !current.has(k)).map(([, n]) => n);
+    for (const v of state.mine) known[norm(v.name)] = v.name;
+    saveLocalNames(known);
     $('#load-error').hidden = true;
     syncSelectionWithName(false);
     renderVoter();
@@ -550,6 +587,8 @@ async function loadVoter() {
 function renderVoter() {
   renderStatus();
   renderFinal();
+  renderLost();
+  renderResults();
   renderMine();
   const closed = !!state.status?.closed;
   $('#form').hidden = closed;
@@ -584,6 +623,54 @@ function renderFinal() {
   box.innerHTML = `<h2>Dit worden onze ${f.length} gerechten</h2>
     <p class="sub">De organisator heeft de definitieve keuze vastgelegd.</p>
     <ol class="final-list">${f.map(id => `<li>${esc(dishName(id))}</li>`).join('')}</ol>`;
+  box.hidden = false;
+}
+
+function renderLost() {
+  const box = $('#lost');
+  if (!state.lost.length) { box.hidden = true; return; }
+  const names = state.lost.map(n => `“${esc(n)}”`).join(', ');
+  const one = state.lost.length === 1;
+  box.innerHTML = `<h2>${one ? 'Een stem van dit toestel werd vervangen' : 'Stemmen van dit toestel werden vervangen'}</h2>
+    <p class="sub">De stem op naam ${names} telt niet meer vanop dit toestel. Waarschijnlijk werd later opnieuw gestemd op ${one ? 'die naam' : 'die namen'} vanop een ander toestel; alleen de laatste stem telt. Het kan ook dat de organisator de stem gewist heeft. Klopt dit niet? Stem opnieuw of laat het ${esc(ORGANIZER)} weten.</p>
+    <div class="row"><button type="button" class="btn" id="lost-ok">Begrepen</button></div>`;
+  box.hidden = false;
+  $('#lost-ok').onclick = () => {
+    for (const n of state.lost) forgetName(n);
+    state.lost = [];
+    renderLost();
+  };
+}
+
+// Competitierangschikking: gelijke aantallen krijgen dezelfde plaats.
+function withPositions(rows) {
+  return rows.map(r => ({ ...r, pos: rows.filter(x => x.count > r.count).length + 1 }));
+}
+
+function renderResults() {
+  const s = state.status;
+  const box = $('#results');
+  if (!s || !s.closed || !Array.isArray(s.results)) { box.hidden = true; return; }
+  const rows = withPositions(s.results);
+  const total = rows.reduce((a, r) => a + r.count, 0);
+  const max = rows.length ? rows[0].count : 1;
+  const final = new Set(s.final || []);
+  const inTop = rows.filter(r => r.pos <= MAX_DISHES);
+  const tieAtCut = inTop.length > MAX_DISHES ? inTop.filter(r => r.count === inTop[inTop.length - 1].count) : [];
+  let list = '', cut = false;
+  for (const r of rows) {
+    if (!cut && r.pos > MAX_DISHES) { list += `<li class="cutline">Grens: ${MAX_DISHES} gerechten</li>`; cut = true; }
+    list += `<li class="${r.pos <= MAX_DISHES ? 'top' : ''}">
+      <span class="pos">${r.pos}</span>
+      <div><div class="r-name">${esc(dishName(r.dish))}${final.has(r.dish) ? ' <span class="badge final">Besteld</span>' : ''}</div><div class="r-cat">${esc(dishCat(r.dish))}</div></div>
+      <span class="r-count">${r.count}</span>
+      <div class="r-bar"><i style="width:${Math.round(r.count / max * 100)}%"></i></div>
+    </li>`;
+  }
+  box.innerHTML = `<h2>Resultaten</h2>
+    <p class="sub">${total} ${total === 1 ? 'stem' : 'stemmen'} op ${rows.length} ${rows.length === 1 ? 'gerecht' : 'verschillende gerechten'}. Wie wat koos blijft verborgen. Op basis hiervan kiezen we samen de ${MAX_DISHES} gerechten.</p>
+    ${tieAtCut.length ? `<p class="warn" style="margin-top:10px">Gelijkstand rond plaats ${MAX_DISHES}: ${esc(tieAtCut.map(r => dishName(r.dish)).join(', '))}. Daar beslissen we samen over.</p>` : ''}
+    ${rows.length ? `<ol class="rank">${list}</ol>` : '<p class="empty">Er werden geen stemmen uitgebracht.</p>'}`;
   box.hidden = false;
 }
 
@@ -663,7 +750,15 @@ function showFormMsg(msg) {
   m.hidden = !msg;
 }
 
-async function submitVote() {
+function showReplace(name) {
+  $('#replace-text').textContent = `Op de naam “${name}” werd al eerder gestemd, vanop een ander toestel of door de organisator. Alleen de laatste stem telt: als je doorgaat, wordt die eerdere stem verwijderd en telt jouw keuze (${dishName(state.selected)}). Ben je iemand anders met dezelfde naam? Voeg dan je familienaam toe.`;
+  const box = $('#replace-box');
+  box.hidden = false;
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function hideReplace() { $('#replace-box').hidden = true; }
+
+async function submitVote(replace) {
   const nameEl = $('#name');
   const name = nameEl.value.trim().replace(/\s+/g, ' ');
   if (norm(name).length < 2) {
@@ -674,19 +769,26 @@ async function submitVote() {
     return;
   }
   if (!state.selected) return;
-  state.busy = true; renderBar(); showFormMsg('');
+  state.busy = true; renderBar(); showFormMsg(''); hideReplace();
   try {
     const wasMine = !!currentMine();
-    await rpc('cast_vote', { p_name: name, p_dish: state.selected, p_token: TOKEN });
+    const args = { p_name: name, p_dish: state.selected, p_token: TOKEN };
+    if (replace === true) args.p_replace = true;
+    const res = await rpc('cast_vote', args);
     sset('pst-name', name);
-    toast(wasMine ? `Je stem is aangepast naar: ${dishName(state.selected)}.` : `Bedankt, ${name}! Je stem voor ${dishName(state.selected)} is genoteerd.`);
+    rememberName(name);
+    const dish = dishName(state.selected);
+    toast(res && res.replaced ? `De eerdere stem op naam ${name} is verwijderd. Alleen deze nieuwe stem telt: ${dish}.`
+      : wasMine ? `Je stem is aangepast naar: ${dish}.`
+      : `Bedankt, ${name}! Je stem voor ${dish} is genoteerd.`);
     state.busy = false;
     await loadVoter();
   } catch (e) {
     state.busy = false;
-    showFormMsg(errText(e, name));
-    toast(errText(e, name), true);
     renderBar();
+    if (e.code === 'name_exists') { showReplace(name); return; }
+    showFormMsg(errText(e));
+    toast(errText(e), true);
     if (e.code === 'closed') loadVoter();
   }
 }
@@ -696,6 +798,7 @@ async function withdraw(i) {
   if (!v || !confirm(`Stem van ${v.name} (${dishName(v.dish)}) intrekken?`)) return;
   try {
     await rpc('withdraw_vote', { p_name: v.name, p_token: TOKEN });
+    forgetName(v.name);
     toast(`De stem van ${v.name} is ingetrokken.`);
     if (norm($('#name').value) === norm(v.name)) state.selected = null;
     await loadVoter();
@@ -707,6 +810,7 @@ $('#menu').addEventListener('click', e => {
   if (!b || b.disabled) return;
   state.selected = b.dataset.id;
   for (const el of document.querySelectorAll('.dish')) el.setAttribute('aria-checked', String(el === b));
+  hideReplace();
   renderBar();
 });
 $('#menu').addEventListener('keydown', e => {
@@ -726,6 +830,7 @@ document.querySelector('.toolbar').addEventListener('click', e => {
 $('#name').addEventListener('input', () => {
   $('#name').classList.remove('invalid');
   showFormMsg('');
+  hideReplace();
   const mine = currentMine();
   if (mine) {
     state.selected = mine.dish;
@@ -733,7 +838,15 @@ $('#name').addEventListener('input', () => {
   }
   renderBar();
 });
-$('#submit').addEventListener('click', submitVote);
+$('#submit').addEventListener('click', () => submitVote(false));
+$('#replace-yes').addEventListener('click', () => submitVote(true));
+$('#replace-no').addEventListener('click', () => {
+  hideReplace();
+  const n = $('#name');
+  n.focus();
+  n.setSelectionRange(n.value.length, n.value.length);
+  showFormMsg('Voeg je familienaam toe zodat je naam uniek is, en stem opnieuw.');
+});
 $('#mine-list').addEventListener('click', e => {
   const ed = e.target.closest('[data-edit]');
   const wd = e.target.closest('[data-withdraw]');
@@ -881,7 +994,7 @@ function renderAdmin() {
 
     <section class="card">
       <h2>Deadline</h2>
-      <p class="sub">${d.deadline ? `${closed ? 'Afgesloten sinds' : 'Stemmen kan tot'} ${esc(fmtDate.format(new Date(d.deadline)))}.` : 'Nog geen deadline: de stemming blijft open.'} Na de deadline kan niemand nog stemmen of wijzigen, behalve jij hieronder.</p>
+      <p class="sub">${d.deadline ? `${closed ? 'Afgesloten sinds' : 'Stemmen kan tot'} ${esc(fmtDate.format(new Date(d.deadline)))}.` : 'Nog geen deadline: de stemming blijft open.'} Na de deadline kan niemand nog stemmen of wijzigen, behalve jij hieronder, en ziet iedereen de resultaten (aantal stemmen per gerecht, zonder namen) als basis voor de discussie.</p>
       <div class="row">
         <div class="grow"><label class="field" for="a-deadline">Datum en uur</label><input class="input" id="a-deadline" type="datetime-local" value="${toLocalInput(d.deadline)}"></div>
         <button class="btn primary" type="button" id="a-deadline-save">Opslaan</button>
@@ -891,7 +1004,7 @@ function renderAdmin() {
 
     <section class="card">
       <h2>Definitieve keuze</h2>
-      <p class="sub">Vink de gerechten aan die je bestelt en publiceer: stemmers zien dan bovenaan “Dit worden onze gerechten”. ${final.length ? `<b>Nu gepubliceerd: ${final.length} gerechten.</b>` : 'Nog niets gepubliceerd.'}</p>
+      <p class="sub">Na de discussie: vink de gerechten aan die jullie kozen en publiceer. Iedereen ziet dan bovenaan “Dit worden onze gerechten”. ${final.length ? `<b>Nu gepubliceerd: ${final.length} gerechten.</b>` : 'Nog niets gepubliceerd.'}</p>
       <div class="checks" id="a-picks">${pickList.map(id => `
         <label class="check"><input type="checkbox" value="${id}"${adm.finalPick.has(id) ? ' checked' : ''}>
           <span>${esc(dishName(id))} <em>· ${esc(dishCat(id))} · ${countOf[id] || 0} ${countOf[id] === 1 ? 'stem' : 'stemmen'}</em></span></label>`).join('')}
@@ -920,7 +1033,7 @@ function renderAdmin() {
       ${votes.length ? `<div class="table-wrap"><table>
         <thead><tr><th>Naam</th><th>Gerecht</th><th></th></tr></thead>
         <tbody>${[...votes].sort((a, b) => byName(a.name, b.name)).map(v => `
-          <tr><td><b>${esc(v.name)}</b><span class="meta">${esc(fmtShort.format(new Date(v.updated_at)))}${v.by_admin ? ' · door jou' : ''}</span></td>
+          <tr><td><b>${esc(v.name)}</b><span class="meta">${esc(fmtShort.format(new Date(v.updated_at)))}${v.by_admin ? ' · door jou' : ''}${v.replaced_count ? ` · eerdere stem ${v.replaced_count}× vervangen vanop ander toestel` : ''}</span></td>
           <td>${esc(dishName(v.dish))}</td>
           <td class="t-act"><button class="btn small" type="button" data-fill="${esc(v.id)}">Wijzig</button> <button class="btn small ghost danger" type="button" data-del="${esc(v.id)}">Wis</button></td></tr>`).join('')}
         </tbody></table></div>` : '<p class="empty">Nog geen stemmen.</p>'}
