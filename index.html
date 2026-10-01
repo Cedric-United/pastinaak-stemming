@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Pastinaak · Familie-etentje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f1e8;
+  --surface: #fffdf8;
+  --surface-2: #efe8db;
+  --ink: #2a2823;
+  --muted: #6d675c;
+  --line: #e2d9c8;
+  --accent: #3d6a4d;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2ece4;
+  --chosen: #9a4a22;
+  --chosen-soft: #f6e2d4;
+  --final: #7a5a00;
+  --final-soft: #f6ebc4;
+  --danger: #a3352b;
+  --shadow: 0 1px 2px rgba(42, 40, 35, .06), 0 4px 16px rgba(42, 40, 35, .06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1916;
+    --surface: #23211d;
+    --surface-2: #2c2a25;
+    --ink: #eeeae1;
+    --muted: #a59e91;
+    --line: #3a3630;
+    --accent: #86b694;
+    --accent-ink: #14201a;
+    --accent-soft: #24342a;
+    --chosen: #f0a477;
+    --chosen-soft: #43291c;
+    --final: #e6c55c;
+    --final-soft: #3d3218;
+    --danger: #f08a7e;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1a1916; --surface: #23211d; --surface-2: #2c2a25; --ink: #eeeae1; --muted: #a59e91;
+  --line: #3a3630; --accent: #86b694; --accent-ink: #14201a; --accent-soft: #24342a;
+  --chosen: #f0a477; --chosen-soft: #43291c; --final: #e6c55c; --final-soft: #3d3218;
+  --danger: #f08a7e; --shadow: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 650; line-height: 1.15; margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+a { color: var(--accent); }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* ---------- Kop ---------- */
+.hero { padding: 32px 0 8px; }
+.eyebrow { margin: 0 0 10px; color: var(--muted); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; font-weight: 600; }
+.hero h1 { font-size: clamp(28px, 7vw, 38px); }
+.lede { margin: 12px 0 0; color: var(--muted); max-width: 52ch; }
+
+.status { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0 0; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.stat b { display: block; font-size: 15px; line-height: 1.3; }
+.stat span { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.35; margin-top: 2px; }
+.stat.closed b { color: var(--danger); }
+
+.nudge { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--chosen-soft); color: var(--ink); font-size: 14px; }
+
+/* ---------- Kaarten ---------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 16px 0; box-shadow: var(--shadow); }
+.card h2 { font-size: 20px; margin-bottom: 8px; }
+.card p { margin: 0; }
+.card .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+.final-card { border-color: var(--final); background: var(--final-soft); }
+.final-list { margin: 10px 0 0; padding-left: 20px; }
+.final-list li { margin: 2px 0; }
+
+label.field { display: block; font-weight: 600; font-size: 15px; }
+.input {
+  display: block; width: 100%; margin-top: 6px; padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg);
+  font-size: 17px;
+}
+.input:focus { border-color: var(--accent); }
+.input.invalid { border-color: var(--danger); animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.hint { color: var(--muted); font-size: 13.5px; margin-top: 8px !important; }
+.form-msg { margin-top: 10px !important; font-size: 14px; color: var(--danger); }
+
+.mine-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.mine-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--line); }
+.mine-list li:first-child { border-top: 0; }
+.mine-list .who { flex: 1 1 200px; min-width: 0; }
+.mine-list .who b { display: block; }
+.mine-list .who span { color: var(--muted); font-size: 14px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); font-weight: 600; font-size: 15px; min-height: 44px;
+}
+a.btn { text-decoration: none; color: inherit; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.small { padding: 6px 12px; min-height: 36px; font-size: 14px; }
+.btn.ghost { background: transparent; }
+.btn.danger { color: var(--danger); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- Menu ---------- */
+.toolbar { display: flex; gap: 8px; margin: 24px 0 4px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); font-size: 14px; font-weight: 500;
+}
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+.cat { margin: 22px 0 0; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.cat-head h2 { font-size: 21px; }
+.cat-head span { color: var(--muted); font-size: 13px; }
+.cat-note { color: var(--muted); font-size: 13.5px; margin: -4px 0 8px; }
+
+.dishes { display: grid; gap: 8px; }
+.dish {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
+  padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); transition: border-color .12s, background .12s;
+}
+.dish:hover { border-color: var(--muted); }
+.dish .radio {
+  flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%;
+  border: 2px solid var(--line); display: grid; place-items: center;
+}
+.dish[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.dish[aria-checked="true"] .radio { border-color: var(--accent); }
+.dish[aria-checked="true"] .radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.dish-main { flex: 1 1 auto; min-width: 0; }
+.dish-name { display: block; font-weight: 500; line-height: 1.35; }
+.dish-detail { display: block; color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+.dish-side { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.price { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.badge.chosen { background: var(--chosen-soft); color: var(--chosen); }
+.badge.final { background: var(--final-soft); color: var(--final); }
+.dish.dim { opacity: .55; }
+.dish:disabled { cursor: default; }
+.dish:disabled:hover { border-color: var(--line); }
+
+.empty { color: var(--muted); padding: 16px 0; }
+
+/* ---------- Stembalk ---------- */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--surface); border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, .08);
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+}
+.bar .wrap { display: flex; align-items: center; gap: 12px; }
+.bar-text { flex: 1 1 auto; min-width: 0; font-size: 14px; color: var(--muted); }
+.bar-text b { display: block; color: var(--ink); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .btn { flex: 0 0 auto; }
+body.has-bar main { padding-bottom: 96px; }
+
+footer { color: var(--muted); font-size: 13px; padding: 28px 0 32px; }
+footer p { margin: 4px 0; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  z-index: 20; max-width: calc(100% - 32px); width: max-content;
+  background: var(--ink); color: var(--bg); padding: 12px 16px; border-radius: 12px;
+  font-size: 14.5px; box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
+}
+.toast.error { background: var(--danger); color: #fff; }
+
+/* ---------- Beheer ---------- */
+.admin-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 28px 0 4px; }
+.admin-top h1 { font-size: 30px; }
+.admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.tile b { display: block; font-family: Fraunces, Georgia, serif; font-size: 28px; line-height: 1.1; }
+.tile span { color: var(--muted); font-size: 13px; }
+.warn { padding: 10px 12px; border-radius: 10px; background: var(--chosen-soft); font-size: 14px; margin: 0 0 12px; }
+
+.rank { list-style: none; margin: 8px 0 0; padding: 0; }
+.rank li { display: grid; grid-template-columns: 28px 1fr auto; gap: 4px 10px; padding: 10px 0; border-top: 1px solid var(--line); align-items: start; }
+.rank li:first-child { border-top: 0; }
+.rank .pos { font-family: Fraunces, Georgia, serif; font-size: 18px; color: var(--muted); text-align: center; }
+.rank li.top .pos { color: var(--accent); font-weight: 650; }
+.rank .r-name { font-weight: 600; line-height: 1.35; }
+.rank .r-cat { color: var(--muted); font-size: 12.5px; }
+.rank .r-count { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+.rank .r-bar { grid-column: 2 / 4; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.rank .r-bar i { display: block; height: 100%; background: var(--muted); border-radius: 3px; }
+.rank li.top .r-bar i { background: var(--accent); }
+.rank .r-names { grid-column: 2 / 4; color: var(--muted); font-size: 13.5px; }
+.cut { list-style: none; }
+.rank li.cutline { display: block; border-top: 2px dashed var(--accent); padding: 4px 0 0; color: var(--accent); font-size: 12px; font-weight: 600; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12.5px; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.t-act { text-align: right; padding-right: 0; }
+td .meta { display: block; color: var(--muted); font-size: 12.5px; }
+.table-wrap { overflow-x: auto; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-top: 10px; }
+.row > .grow { flex: 1 1 220px; }
+.checks { display: grid; gap: 6px; margin-top: 10px; }
+.check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); }
+.check span { flex: 1; }
+.check em { font-style: normal; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 420px) {
+  .status, .tiles { grid-template-columns: 1fr 1fr; }
+  .status .stat:first-child, .tiles .tile:first-child { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Stempagina ================= -->
+<div id="voter">
+  <div class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Familie-etentje · Brasserie Pastinaak, Herenthout</p>
+      <h1>Welk hoofdgerecht kies jij?</h1>
+      <p class="lede">We mogen met de groep maar <strong>6 hoofdgerechten</strong> kiezen. Duid jouw favoriet aan; de gerechten met de meeste stemmen worden besteld.</p>
+      <div class="status" id="status" aria-live="polite"></div>
+      <p class="nudge" id="nudge" hidden></p>
+    </header>
+  </div>
+
+  <main class="wrap">
+    <section class="card" id="load-error" hidden></section>
+
+    <section class="card final-card" id="final" hidden></section>
+
+    <section class="card" id="mine" hidden>
+      <h2>Gestemd vanop dit toestel</h2>
+      <ul class="mine-list" id="mine-list"></ul>
+    </section>
+
+    <section class="card" id="form">
+      <label class="field" for="name">Jouw naam</label>
+      <input class="input" id="name" type="text" autocomplete="name" maxlength="60" placeholder="bv. Marie Peeters">
+      <p class="hint">Je naam ziet alleen de organisator. De anderen zien enkel welke gerechten al gekozen zijn, niet door wie. Stem je voor iemand anders (bv. een kind of oma)? Vul dan zijn of haar naam in en stem daarna opnieuw voor jezelf.</p>
+      <p class="form-msg" id="form-msg" hidden></p>
+    </section>
+
+    <section class="card" id="closed" hidden>
+      <h2>De stemming is afgesloten</h2>
+      <p class="sub">Bedankt om mee te stemmen. Moet er toch nog iets wijzigen? Laat het de organisator weten.</p>
+    </section>
+
+    <div class="toolbar" role="group" aria-label="Filter">
+      <button type="button" class="chip" data-filter="all" aria-pressed="true">Alle gerechten</button>
+      <button type="button" class="chip" data-filter="chosen" aria-pressed="false" id="chip-chosen">Al gekozen</button>
+    </div>
+    <div id="menu" role="radiogroup" aria-label="Hoofdgerechten"></div>
+
+    <footer>
+      <p>Gerechten en prijzen volgens de menukaart op pastinaak.be (geraadpleegd op 1 oktober 2026). Sauzen bij vlees (béarnaise, peperroom, champignonroom …) kosten een supplement.</p>
+      <p><a href="#admin">Beheer</a></p>
+    </footer>
+  </main>
+
+  <div class="bar" id="bar" hidden>
+    <div class="wrap">
+      <div class="bar-text" id="bar-text"></div>
+      <button type="button" class="btn primary" id="submit">Stem uitbrengen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Beheer ================= -->
+<div id="admin" hidden>
+  <div class="wrap" id="admin-root"></div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+'use strict';
+
+// ---------------------------------------------------------------------------
+// Configuratie
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  url: 'https://bahqsdxlhuvarmkzgkac.supabase.co',
+  key: 'sb_publishable_GIP7_0oOSaWQRU1GhaD9sQ_8Pl4I90T',   // publishable key: publiek, veilig in de pagina (RLS + RPC's)
+};
+const ORGANIZER = 'Cédric';
+const MAX_DISHES = 6;
+const DEMO = new URLSearchParams(location.search).has('demo');
+
+// ---------------------------------------------------------------------------
+// Menukaart (id's zijn de sleutels in de database: niet wijzigen na start)
+// ---------------------------------------------------------------------------
+const WARM = 'Met warme groenten i.p.v. sla: + € 3';
+const MENU = [
+  { cat: 'Mosselen', note: 'Suggestie van het seizoen', items: [
+    ['mos-natuur', 'Mosselen natuur', 30.5],
+    ['mos-witte-wijn', 'Mosselen witte wijn', 31.0],
+    ['mos-look', 'Mosselen look (room)', 31.5],
+    ['mos-curry', 'Mosselen curryroom', 31.5],
+    ['mos-noors', 'Mosselen op Noorse wijze', 32.0],
+    ['mos-pastinaak', 'Mosselen ‘Pastinaak’', 32.0],
+  ]},
+  { cat: 'Suggesties', note: 'Wisselende suggesties van de chef', items: [
+    ['sug-zeebaars', 'Zeebaars met duo van bloemkool & courgette', 32.5, 'Saffraansaus'],
+    ['sug-varkensrug', 'Varkensrugfilet Duke of Berkshire', 33.0, 'Mosterd-tijmsaus'],
+    ['sug-spaghetti', 'Spaghetti met spek & broccoli-parmezaansaus', 24.0, 'Basilicum & look'],
+    ['sug-salade-kip-mango', 'Salade met gerookte kip & mango', 25.0],
+  ]},
+  { cat: 'Vis', items: [
+    ['vis-zeetong', 'Gebakken zeetong met citroenboter & tartaar', 39.0],
+    ['vis-kabeljauw', 'Gebakken kabeljauw met zuiderse groenten', 33.0],
+    ['vis-zalm', 'Gebakken zalmfilet met gewokte groenten', 30.0, 'Graanmosterdsaus'],
+    ['vis-scampi-pastinaak', 'Scampi ‘Pastinaak’ met warme groenten', 26.0, '8 stuks · lichtpikante tomatensaus met wodka en room'],
+    ['vis-scampi-look', 'Scampi lookboter of lookroom met warme groenten', 26.0, '8 stuks'],
+    ['vis-scampi-curry', 'Scampi curry met warme groenten', 26.0, '8 stuks'],
+  ]},
+  { cat: 'Vlees', items: [
+    ['vlees-burger', 'Burger met sla, tomaat & parmezaan', 22.0, 'Kip- of rundburger'],
+    ['vlees-brochette', 'Gemengde vleesbrochette met sla', 31.0, WARM],
+    ['vlees-videe', 'Huisbereide vidée van kip met een fris slaatje', 25.5],
+    ['vlees-kipfilet', 'Kipfilet met sla', 25.0, WARM],
+    ['vlees-varkenshaasje', 'Varkenshaasje met sla', 27.0, WARM],
+    ['vlees-steak', 'Steak met sla', 28.9, WARM],
+    ['vlees-filet-pur', 'Filet pur met sla', 39.5, WARM],
+    ['vlees-loempia', 'Huisbereide loempia met kip, rijst en curry', 25.5],
+  ]},
+  { cat: 'Pasta', items: [
+    ['pasta-scampi', 'Pasta met scampi, rode pesto & fijne groentjes', 24.0],
+    ['pasta-pesto-kip', 'Pasta pesto met kip', 22.5, 'Kip, room, pesto, champignon, ajuin'],
+    ['pasta-tagliatelle-zalm', 'Tagliatelle met verse zalm & tuinkruidenkaas', 24.5],
+    ['pasta-spaghetti', 'Huisbereide spaghetti bolognaise', 18.0],
+    ['pasta-lasagne', 'Huisbereide lasagne bolognaise', 19.0],
+  ]},
+  { cat: 'Salades', items: [
+    ['sal-caesar', 'Caesar salad', 23.0],
+    ['sal-scampi-spek', 'Slaatje met scampi & spek', 23.5],
+    ['sal-geitenkaas-spek', 'Slaatje met geitenkaas & spekreepjes', 23.5],
+    ['sal-kip-ananas', 'Slaatje met kip & gebakken ananas', 23.0],
+  ]},
+  { cat: 'Vegetarisch', items: [
+    ['veg-geitenkaas', 'Slaatje met geitenkaas', 21.5],
+    ['veg-pasta', 'Vegetarische pasta', 20.5],
+    ['veg-rijst', 'Rijstschotel met wokgroenten', 20.5],
+  ]},
+];
+const DISH = {};
+for (const c of MENU) for (const [id, name, price, detail] of c.items) DISH[id] = { id, name, price, detail, cat: c.cat };
+const dishName = id => (DISH[id] ? DISH[id].name : `Onbekend gerecht (${id})`);
+const dishCat = id => (DISH[id] ? DISH[id].cat : '');
+
+// ---------------------------------------------------------------------------
+// Hulpjes
+// ---------------------------------------------------------------------------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+const fmtPrice = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' });
+const fmtDate = new Intl.DateTimeFormat('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const fmtShort = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const byName = (a, b) => a.localeCompare(b, 'nl', { sensitivity: 'base' });
+
+function storage(kind) { try { return kind === 'session' ? window.sessionStorage : window.localStorage; } catch { return null; } }
+function sget(k, kind) { try { return storage(kind)?.getItem(k) ?? null; } catch { return null; } }
+function sset(k, v, kind) { try { storage(kind)?.setItem(k, v); } catch { /* privémodus: niet bewaren */ } }
+function sdel(k, kind) { try { storage(kind)?.removeItem(k); } catch { /* idem */ } }
+
+function newToken() {
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+}
+let TOKEN = sget('pst-token');
+if (!TOKEN || TOKEN.length < 16) { TOKEN = newToken(); sset('pst-token', TOKEN); }
+
+function timeLeft(iso) {
+  const ms = new Date(iso) - Date.now();
+  if (ms <= 0) return 'afgelopen';
+  const h = ms / 36e5;
+  if (h < 1) return `nog ${Math.max(1, Math.round(ms / 6e4))} min`;
+  if (h < 48) return `nog ${Math.round(h)} uur`;
+  return `nog ${Math.round(h / 24)} dagen`;
+}
+
+let toastTimer;
+function toast(msg, isError) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, isError ? 6000 : 3500);
+}
+
+const MESSAGES = {
+  closed: 'De stemming is afgesloten.',
+  bad_name: 'Vul je naam in (minstens 2 letters).',
+  bad_dish: 'Kies eerst een gerecht.',
+  full: `Het maximum aantal stemmen is bereikt. Laat het ${ORGANIZER} weten.`,
+  forbidden: 'Verkeerde beheercode.',
+  network: 'Geen verbinding met de stemdatabase. Controleer je internet en probeer opnieuw.',
+  not_configured: 'Deze stempagina is nog niet gekoppeld aan een database.',
+};
+function errText(e, name) {
+  if (e && e.code === 'name_taken') {
+    return `Onder de naam “${name}” werd al gestemd vanop een ander toestel. Ben jij dat? Vraag ${ORGANIZER} om je stem aan te passen, of voeg je familienaam toe.`;
+  }
+  return MESSAGES[e && e.code] || `Er ging iets mis (${(e && e.code) || 'onbekend'}). Probeer opnieuw.`;
+}
+
+// ---------------------------------------------------------------------------
+// Backend: Supabase-RPC's, of een nepdatabase in het geheugen met ?demo
+// ---------------------------------------------------------------------------
+function fail(code) { const e = new Error(code); e.code = code; return e; }
+
+async function rpc(fn, args = {}) {
+  if (DEMO) { await new Promise(r => setTimeout(r, 120)); return demo(fn, args); }
+  if (!CONFIG.url || !CONFIG.key) throw fail('not_configured');
+  const headers = { 'Content-Type': 'application/json', apikey: CONFIG.key };
+  if (CONFIG.key.startsWith('eyJ')) headers.Authorization = 'Bearer ' + CONFIG.key;
+  let res;
+  try {
+    res = await fetch(`${CONFIG.url}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
+  } catch { throw fail('network'); }
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { /* geen JSON */ }
+  if (!res.ok) throw fail((data && data.message) || `http_${res.status}`);
+  return data;
+}
+
+const demoDb = (() => {
+  const now = Date.now();
+  const seed = [
+    ['Jan', 'vlees-steak'], ['An', 'mos-natuur'], ['Marie', 'vis-zalm'], ['Luc', 'vlees-steak'],
+    ['Sofie', 'sal-caesar'], ['Tom', 'mos-pastinaak'], ['Els', 'vis-zalm'], ['Bart', 'vlees-filet-pur'],
+    ['Lotte', 'pasta-lasagne'], ['Wim', 'mos-natuur'], ['Greet', 'vis-zeetong'], ['Koen', 'vlees-steak'],
+    ['Nina', 'veg-pasta'], ['Pieter', 'sal-caesar'],
+  ];
+  return {
+    deadline: new Date(now + 3 * 864e5).toISOString(),
+    final: null,
+    votes: seed.map(([name, dish], i) => {
+      const t = new Date(now - (seed.length - i) * 36e5).toISOString();
+      return { id: 'demo-' + i, name, norm: norm(name), dish, token: 'x', by_admin: false, created_at: t, updated_at: t };
+    }),
+  };
+})();
+
+function demo(fn, a) {
+  const db = demoDb;
+  const closed = db.deadline && new Date(db.deadline) <= new Date();
+  const isAdmin = () => { if (a.p_code !== 'demo') throw fail('forbidden'); };
+  const checkName = n => { if (norm(n).length < 2 || String(n).trim().length > 60) throw fail('bad_name'); };
+  const checkDish = d => { if (!/^[a-z0-9-]{2,40}$/.test(d || '')) throw fail('bad_dish'); };
+  const nowIso = new Date().toISOString();
+  switch (fn) {
+    case 'get_status':
+      return { deadline: db.deadline, closed, final: db.final, chosen: [...new Set(db.votes.map(v => v.dish))].sort(), voters: db.votes.length, now: nowIso };
+    case 'my_votes':
+      return db.votes.filter(v => v.token === a.p_token).map(v => ({ name: v.name, dish: v.dish }));
+    case 'cast_vote': {
+      if (closed) throw fail('closed');
+      checkName(a.p_name); checkDish(a.p_dish);
+      const v = db.votes.find(x => x.norm === norm(a.p_name));
+      if (v) {
+        if (v.token !== a.p_token) throw fail('name_taken');
+        Object.assign(v, { dish: a.p_dish, name: a.p_name.trim(), updated_at: nowIso });
+      } else {
+        db.votes.push({ id: 'demo-' + Math.random().toString(36).slice(2), name: a.p_name.trim(), norm: norm(a.p_name), dish: a.p_dish, token: a.p_token, by_admin: false, created_at: nowIso, updated_at: nowIso });
+      }
+      return { ok: true };
+    }
+    case 'withdraw_vote': {
+      if (closed) throw fail('closed');
+      const i = db.votes.findIndex(x => x.norm === norm(a.p_name) && x.token === a.p_token);
+      if (i >= 0) db.votes.splice(i, 1);
+      return { ok: i >= 0 };
+    }
+    case 'admin_data':
+      isAdmin();
+      return { deadline: db.deadline, final: db.final, now: nowIso, votes: db.votes.map(v => ({ id: v.id, name: v.name, dish: v.dish, by_admin: v.by_admin, created_at: v.created_at, updated_at: v.updated_at })) };
+    case 'admin_set_deadline': isAdmin(); db.deadline = a.p_deadline; return { ok: true };
+    case 'admin_set_final': isAdmin(); db.final = a.p_dishes && a.p_dishes.length ? a.p_dishes : null; return { ok: true };
+    case 'admin_delete_vote': isAdmin(); db.votes = db.votes.filter(v => v.id !== a.p_id); return { ok: true };
+    case 'admin_cast_vote': {
+      isAdmin(); checkName(a.p_name); checkDish(a.p_dish);
+      const v = db.votes.find(x => x.norm === norm(a.p_name));
+      if (v) Object.assign(v, { dish: a.p_dish, name: a.p_name.trim(), by_admin: true, updated_at: nowIso });
+      else db.votes.push({ id: 'demo-' + Math.random().toString(36).slice(2), name: a.p_name.trim(), norm: norm(a.p_name), dish: a.p_dish, token: null, by_admin: true, created_at: nowIso, updated_at: nowIso });
+      return { ok: true };
+    }
+    default: throw fail('unknown_fn');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Stempagina
+// ---------------------------------------------------------------------------
+const state = { status: null, mine: [], selected: null, filter: 'all', busy: false };
+
+async function loadVoter() {
+  try {
+    const [status, mine] = await Promise.all([rpc('get_status'), rpc('my_votes', { p_token: TOKEN })]);
+    state.status = status;
+    state.mine = Array.isArray(mine) ? mine : [];
+    $('#load-error').hidden = true;
+    syncSelectionWithName(false);
+    renderVoter();
+  } catch (e) {
+    const box = $('#load-error');
+    box.innerHTML = `<h2>Even geduld</h2><p class="sub">${esc(errText(e))}</p><div class="row"><button type="button" class="btn" id="retry">Opnieuw proberen</button></div>`;
+    box.hidden = false;
+    $('#retry').onclick = loadVoter;
+    if (!state.status) renderMenu();
+  }
+}
+
+function renderVoter() {
+  renderStatus();
+  renderFinal();
+  renderMine();
+  const closed = !!state.status?.closed;
+  $('#form').hidden = closed;
+  $('#closed').hidden = !closed;
+  renderMenu();
+  renderBar();
+}
+
+function renderStatus() {
+  const s = state.status;
+  if (!s) return;
+  const chosen = s.chosen || [];
+  let deadline;
+  if (s.closed) deadline = `<div class="stat closed"><b>Afgesloten</b><span>sinds ${esc(fmtDate.format(new Date(s.deadline)))}</span></div>`;
+  else if (s.deadline) deadline = `<div class="stat"><b>${esc(timeLeft(s.deadline))}</b><span>stemmen tot ${esc(fmtDate.format(new Date(s.deadline)))}</span></div>`;
+  else deadline = `<div class="stat"><b>Stemmen open</b><span>deadline volgt</span></div>`;
+  $('#status').innerHTML = deadline +
+    `<div class="stat"><b>${s.voters} ${s.voters === 1 ? 'stem' : 'stemmen'}</b><span>al binnen</span></div>` +
+    `<div class="stat"><b>${chosen.length} ${chosen.length === 1 ? 'gerecht' : 'gerechten'}</b><span>gekozen, ${MAX_DISHES} worden besteld</span></div>`;
+  const nudge = $('#nudge');
+  if (!s.closed && !s.final && chosen.length > MAX_DISHES) {
+    nudge.textContent = `Er zijn al ${chosen.length} verschillende gerechten gekozen, maar we mogen er maar ${MAX_DISHES} nemen. Vind je een gerecht met “Al gekozen” even lekker? Dan helpt die keuze het meest.`;
+    nudge.hidden = false;
+  } else nudge.hidden = true;
+  $('#chip-chosen').textContent = `Al gekozen (${chosen.length})`;
+}
+
+function renderFinal() {
+  const f = state.status?.final;
+  const box = $('#final');
+  if (!f || !f.length) { box.hidden = true; return; }
+  box.innerHTML = `<h2>Dit worden onze ${f.length} gerechten</h2>
+    <p class="sub">De organisator heeft de definitieve keuze vastgelegd.</p>
+    <ol class="final-list">${f.map(id => `<li>${esc(dishName(id))}</li>`).join('')}</ol>`;
+  box.hidden = false;
+}
+
+function renderMine() {
+  const box = $('#mine');
+  if (!state.mine.length) { box.hidden = true; return; }
+  const closed = !!state.status?.closed;
+  $('#mine-list').innerHTML = state.mine.map((v, i) => `
+    <li>
+      <div class="who"><b>${esc(v.name)}</b><span>${esc(dishName(v.dish))}</span></div>
+      ${closed ? '' : `<button type="button" class="btn small" data-edit="${i}">Wijzig</button>
+      <button type="button" class="btn small ghost danger" data-withdraw="${i}">Trek in</button>`}
+    </li>`).join('');
+  box.hidden = false;
+}
+
+function renderMenu() {
+  const s = state.status || {};
+  const chosen = new Set(s.chosen || []);
+  const final = new Set(s.final || []);
+  const closed = !!s.closed;
+  const onlyChosen = state.filter === 'chosen';
+  let html = '';
+  for (const c of MENU) {
+    const items = c.items.filter(([id]) => !onlyChosen || chosen.has(id));
+    if (!items.length) continue;
+    const nChosen = c.items.filter(([id]) => chosen.has(id)).length;
+    html += `<section class="cat"><div class="cat-head"><h2>${esc(c.cat)}</h2>${nChosen ? `<span>${nChosen} al gekozen</span>` : ''}</div>`;
+    if (c.note) html += `<p class="cat-note">${esc(c.note)}</p>`;
+    html += '<div class="dishes">';
+    for (const [id, name, price, detail] of items) {
+      const sel = state.selected === id;
+      const dim = final.size && !final.has(id);
+      const badge = final.has(id) ? '<span class="badge final">Besteld</span>'
+        : chosen.has(id) ? '<span class="badge chosen">Al gekozen</span>' : '';
+      html += `<button type="button" class="dish${dim ? ' dim' : ''}" role="radio" aria-checked="${sel}" data-id="${id}"${closed ? ' disabled' : ''}>
+        <span class="radio" aria-hidden="true"></span>
+        <span class="dish-main"><span class="dish-name">${esc(name)}</span>${detail ? `<span class="dish-detail">${esc(detail)}</span>` : ''}</span>
+        <span class="dish-side"><span class="price">${esc(fmtPrice.format(price))}</span>${badge}</span>
+      </button>`;
+    }
+    html += '</div></section>';
+  }
+  if (!html) html = '<p class="empty">Er is nog geen enkel gerecht gekozen. Jij mag de eerste zijn!</p>';
+  $('#menu').innerHTML = html;
+}
+
+function currentMine() {
+  const n = norm($('#name').value);
+  return n ? state.mine.find(v => norm(v.name) === n) : null;
+}
+
+function renderBar() {
+  const closed = !!state.status?.closed;
+  const bar = $('#bar');
+  bar.hidden = closed || !state.status;
+  document.body.classList.toggle('has-bar', !bar.hidden);
+  if (bar.hidden) return;
+  const mine = currentMine();
+  const sel = state.selected;
+  $('#bar-text').innerHTML = sel
+    ? `Jouw keuze<b>${esc(dishName(sel))}</b>`
+    : 'Tik op een gerecht<b>Nog niets gekozen</b>';
+  const btn = $('#submit');
+  btn.textContent = mine ? (mine.dish === sel ? 'Gestemd ✓' : 'Stem wijzigen') : 'Stem uitbrengen';
+  btn.disabled = state.busy || !sel || (mine && mine.dish === sel);
+}
+
+function syncSelectionWithName(force) {
+  const mine = currentMine();
+  if (mine && (force || !state.selected)) state.selected = mine.dish;
+}
+
+function showFormMsg(msg) {
+  const m = $('#form-msg');
+  m.textContent = msg || '';
+  m.hidden = !msg;
+}
+
+async function submitVote() {
+  const nameEl = $('#name');
+  const name = nameEl.value.trim().replace(/\s+/g, ' ');
+  if (norm(name).length < 2) {
+    nameEl.classList.remove('invalid'); void nameEl.offsetWidth; nameEl.classList.add('invalid');
+    showFormMsg('Vul eerst je naam in.');
+    nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    nameEl.focus({ preventScroll: true });
+    return;
+  }
+  if (!state.selected) return;
+  state.busy = true; renderBar(); showFormMsg('');
+  try {
+    const wasMine = !!currentMine();
+    await rpc('cast_vote', { p_name: name, p_dish: state.selected, p_token: TOKEN });
+    sset('pst-name', name);
+    toast(wasMine ? `Je stem is aangepast naar: ${dishName(state.selected)}.` : `Bedankt, ${name}! Je stem voor ${dishName(state.selected)} is genoteerd.`);
+    state.busy = false;
+    await loadVoter();
+  } catch (e) {
+    state.busy = false;
+    showFormMsg(errText(e, name));
+    toast(errText(e, name), true);
+    renderBar();
+    if (e.code === 'closed') loadVoter();
+  }
+}
+
+async function withdraw(i) {
+  const v = state.mine[i];
+  if (!v || !confirm(`Stem van ${v.name} (${dishName(v.dish)}) intrekken?`)) return;
+  try {
+    await rpc('withdraw_vote', { p_name: v.name, p_token: TOKEN });
+    toast(`De stem van ${v.name} is ingetrokken.`);
+    if (norm($('#name').value) === norm(v.name)) state.selected = null;
+    await loadVoter();
+  } catch (e) { toast(errText(e), true); }
+}
+
+$('#menu').addEventListener('click', e => {
+  const b = e.target.closest('.dish');
+  if (!b || b.disabled) return;
+  state.selected = b.dataset.id;
+  for (const el of document.querySelectorAll('.dish')) el.setAttribute('aria-checked', String(el === b));
+  renderBar();
+});
+$('#menu').addEventListener('keydown', e => {
+  if (!['ArrowDown', 'ArrowUp'].includes(e.key) || !e.target.closest('.dish')) return;
+  const all = [...document.querySelectorAll('.dish:not([disabled])')];
+  const i = all.indexOf(e.target.closest('.dish'));
+  const next = all[i + (e.key === 'ArrowDown' ? 1 : -1)];
+  if (next) { e.preventDefault(); next.focus(); }
+});
+document.querySelector('.toolbar').addEventListener('click', e => {
+  const c = e.target.closest('.chip');
+  if (!c) return;
+  state.filter = c.dataset.filter;
+  for (const el of document.querySelectorAll('.chip')) el.setAttribute('aria-pressed', String(el === c));
+  renderMenu();
+});
+$('#name').addEventListener('input', () => {
+  $('#name').classList.remove('invalid');
+  showFormMsg('');
+  const mine = currentMine();
+  if (mine) {
+    state.selected = mine.dish;
+    for (const el of document.querySelectorAll('.dish')) el.setAttribute('aria-checked', String(el.dataset.id === mine.dish));
+  }
+  renderBar();
+});
+$('#submit').addEventListener('click', submitVote);
+$('#mine-list').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]');
+  const wd = e.target.closest('[data-withdraw]');
+  if (ed) {
+    const v = state.mine[+ed.dataset.edit];
+    $('#name').value = v.name;
+    state.selected = v.dish;
+    state.filter = 'all';
+    for (const el of document.querySelectorAll('.chip')) el.setAttribute('aria-pressed', String(el.dataset.filter === 'all'));
+    renderMenu(); renderBar();
+    $('#form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toast(`Kies een ander gerecht voor ${v.name} en tik op “Stem wijzigen”.`);
+  } else if (wd) withdraw(+wd.dataset.withdraw);
+});
+
+// ---------------------------------------------------------------------------
+// Beheer
+// ---------------------------------------------------------------------------
+let ADMIN_CODE = sget('pst-admin', 'session');
+const adm = { data: null, showAll: false, finalPick: null, pickTouched: false };
+
+function adminLogin(msg) {
+  $('#admin-root').innerHTML = `
+    <div class="admin-top"><h1>Beheer</h1><a class="btn small" href="#">Naar stempagina</a></div>
+    <section class="card">
+      <form id="login-form">
+        <label class="field" for="code">Beheercode</label>
+        <input class="input" id="code" type="password" autocomplete="current-password" required>
+        ${msg ? `<p class="form-msg">${esc(msg)}</p>` : ''}
+        <div class="row"><button class="btn primary" type="submit">Inloggen</button></div>
+        ${DEMO ? '<p class="hint">Demo-modus: de code is <b>demo</b>.</p>' : ''}
+      </form>
+    </section>`;
+  $('#login-form').onsubmit = async ev => {
+    ev.preventDefault();
+    ADMIN_CODE = $('#code').value.trim();
+    await loadAdmin();
+  };
+  $('#code').focus();
+}
+
+async function loadAdmin() {
+  if (!ADMIN_CODE) return adminLogin();
+  try {
+    adm.data = await rpc('admin_data', { p_code: ADMIN_CODE });
+    sset('pst-admin', ADMIN_CODE, 'session');
+    if (!adm.pickTouched) adm.finalPick = null;
+    renderAdmin();
+  } catch (e) {
+    if (e.code === 'forbidden') { ADMIN_CODE = null; sdel('pst-admin', 'session'); adminLogin('Verkeerde beheercode.'); }
+    else $('#admin-root').innerHTML = `<div class="admin-top"><h1>Beheer</h1></div><section class="card"><p>${esc(errText(e))}</p><div class="row"><button class="btn" type="button" onclick="loadAdmin()">Opnieuw proberen</button></div></section>`;
+  }
+}
+
+function ranking(votes) {
+  const by = {};
+  for (const v of votes) (by[v.dish] = by[v.dish] || []).push(v.name);
+  return Object.entries(by)
+    .map(([dish, names]) => ({ dish, count: names.length, names: names.sort(byName) }))
+    .sort((a, b) => b.count - a.count || byName(dishName(a.dish), dishName(b.dish)));
+}
+
+function selection(rank, final) {
+  if (final && final.length) return { set: new Set(final), label: 'definitieve keuze' };
+  return { set: new Set(rank.slice(0, MAX_DISHES).map(r => r.dish)), label: `huidige top ${MAX_DISHES}` };
+}
+
+function toLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function dishOptions(selected) {
+  return MENU.map(c => `<optgroup label="${esc(c.cat)}">${c.items.map(([id, name]) =>
+    `<option value="${id}"${id === selected ? ' selected' : ''}>${esc(name)}</option>`).join('')}</optgroup>`).join('');
+}
+
+function renderAdmin() {
+  const d = adm.data;
+  const votes = d.votes || [];
+  const rank = ranking(votes);
+  const final = d.final || [];
+  const sel = selection(rank, final);
+  const happy = votes.filter(v => sel.set.has(v.dish));
+  const outside = votes.filter(v => !sel.set.has(v.dish)).sort((a, b) => byName(a.name, b.name));
+  const tieCount = rank.length > MAX_DISHES && rank[MAX_DISHES - 1].count === rank[MAX_DISHES].count ? rank[MAX_DISHES - 1].count : null;
+  const tied = tieCount !== null ? rank.filter(r => r.count === tieCount) : [];
+  const max = rank.length ? rank[0].count : 1;
+  const closed = d.deadline && new Date(d.deadline) <= new Date(d.now || Date.now());
+
+  if (!adm.finalPick) adm.finalPick = new Set(final.length ? final : rank.slice(0, MAX_DISHES).map(r => r.dish));
+  const pickList = adm.showAll
+    ? Object.keys(DISH)
+    : [...new Set([...rank.map(r => r.dish), ...adm.finalPick])];
+  const countOf = Object.fromEntries(rank.map(r => [r.dish, r.count]));
+
+  let rankHtml = '';
+  rank.forEach((r, i) => {
+    if (i === MAX_DISHES && !final.length) rankHtml += `<li class="cutline">Grens: ${MAX_DISHES} gerechten</li>`;
+    const top = sel.set.has(r.dish);
+    rankHtml += `<li class="${top ? 'top' : ''}">
+      <span class="pos">${i + 1}</span>
+      <div><div class="r-name">${esc(dishName(r.dish))}${final.includes(r.dish) ? ' <span class="badge final">Besteld</span>' : ''}</div><div class="r-cat">${esc(dishCat(r.dish))}</div></div>
+      <span class="r-count">${r.count}</span>
+      <div class="r-bar"><i style="width:${Math.round(r.count / max * 100)}%"></i></div>
+      <div class="r-names">${esc(r.names.join(', '))}</div>
+    </li>`;
+  });
+  const finalMissing = final.filter(id => !countOf[id]);
+
+  $('#admin-root').innerHTML = `
+    <div class="admin-top">
+      <h1>Beheer</h1>
+      <div class="admin-actions">
+        <button class="btn small" type="button" id="a-refresh">Vernieuwen</button>
+        <button class="btn small" type="button" id="a-copy">Kopieer overzicht</button>
+        <a class="btn small" href="#">Naar stempagina</a>
+        <button class="btn small ghost" type="button" id="a-logout">Uitloggen</button>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><b>${votes.length}</b><span>${votes.length === 1 ? 'stem' : 'stemmen'}</span></div>
+      <div class="tile"><b>${rank.length}</b><span>verschillende gerechten</span></div>
+      <div class="tile"><b>${happy.length}/${votes.length}</b><span>krijgt favoriet (${esc(sel.label)})</span></div>
+    </div>
+
+    ${tied.length && !final.length ? `<p class="warn"><b>Gelijkstand op plaats ${MAX_DISHES}:</b> ${esc(tied.map(r => dishName(r.dish)).join(', '))} (elk ${tieCount} ${tieCount === 1 ? 'stem' : 'stemmen'}). Jij beslist welke erin gaan via “Definitieve keuze”.</p>` : ''}
+
+    <section class="card">
+      <h2>Stand</h2>
+      <p class="sub">Alleen jij ziet de namen. Stemmers zien enkel welke gerechten al gekozen zijn.</p>
+      ${rank.length ? `<ol class="rank">${rankHtml}</ol>` : '<p class="empty">Nog geen stemmen.</p>'}
+      ${finalMissing.length ? `<p class="hint">In de definitieve keuze zonder stemmen: ${esc(finalMissing.map(dishName).join(', '))}.</p>` : ''}
+    </section>
+
+    <section class="card">
+      <h2>Buiten de ${esc(sel.label)}</h2>
+      ${outside.length
+        ? `<p class="sub">Hun favoriet zit er (nu) niet bij. Vraag hen om een tweede keuze uit de selectie; je kan hun stem hieronder aanpassen.</p>
+           <ul class="mine-list">${outside.map(v => `<li><div class="who"><b>${esc(v.name)}</b><span>${esc(dishName(v.dish))}</span></div></li>`).join('')}</ul>`
+        : '<p class="sub">Iedereen krijgt zijn of haar favoriet. 🎉</p>'}
+    </section>
+
+    <section class="card">
+      <h2>Deadline</h2>
+      <p class="sub">${d.deadline ? `${closed ? 'Afgesloten sinds' : 'Stemmen kan tot'} ${esc(fmtDate.format(new Date(d.deadline)))}.` : 'Nog geen deadline: de stemming blijft open.'} Na de deadline kan niemand nog stemmen of wijzigen, behalve jij hieronder.</p>
+      <div class="row">
+        <div class="grow"><label class="field" for="a-deadline">Datum en uur</label><input class="input" id="a-deadline" type="datetime-local" value="${toLocalInput(d.deadline)}"></div>
+        <button class="btn primary" type="button" id="a-deadline-save">Opslaan</button>
+        ${d.deadline ? '<button class="btn" type="button" id="a-deadline-clear">Deadline wissen</button>' : ''}
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Definitieve keuze</h2>
+      <p class="sub">Vink de gerechten aan die je bestelt en publiceer: stemmers zien dan bovenaan “Dit worden onze gerechten”. ${final.length ? `<b>Nu gepubliceerd: ${final.length} gerechten.</b>` : 'Nog niets gepubliceerd.'}</p>
+      <div class="checks" id="a-picks">${pickList.map(id => `
+        <label class="check"><input type="checkbox" value="${id}"${adm.finalPick.has(id) ? ' checked' : ''}>
+          <span>${esc(dishName(id))} <em>· ${esc(dishCat(id))} · ${countOf[id] || 0} ${countOf[id] === 1 ? 'stem' : 'stemmen'}</em></span></label>`).join('')}
+      </div>
+      <div class="row">
+        <button class="btn primary" type="button" id="a-final-save">Publiceer (<span id="a-pick-n">${adm.finalPick.size}</span>/${MAX_DISHES})</button>
+        ${final.length ? '<button class="btn" type="button" id="a-final-clear">Publicatie intrekken</button>' : ''}
+        <button class="btn ghost" type="button" id="a-showall">${adm.showAll ? 'Enkel gekozen gerechten' : 'Toon alle gerechten'}</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Stem namens iemand</h2>
+      <p class="sub">Voor wie geen smartphone heeft of een andere keuze doorgaf. Bestaat de naam al, dan wordt die stem overschreven (ook na de deadline).</p>
+      <div class="row">
+        <div class="grow"><label class="field" for="a-name">Naam</label><input class="input" id="a-name" type="text" maxlength="60"></div>
+      </div>
+      <div class="row">
+        <div class="grow"><label class="field" for="a-dish">Gerecht</label><select class="input" id="a-dish">${dishOptions()}</select></div>
+        <button class="btn primary" type="button" id="a-cast">Opslaan</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Alle stemmen (${votes.length})</h2>
+      ${votes.length ? `<div class="table-wrap"><table>
+        <thead><tr><th>Naam</th><th>Gerecht</th><th></th></tr></thead>
+        <tbody>${[...votes].sort((a, b) => byName(a.name, b.name)).map(v => `
+          <tr><td><b>${esc(v.name)}</b><span class="meta">${esc(fmtShort.format(new Date(v.updated_at)))}${v.by_admin ? ' · door jou' : ''}</span></td>
+          <td>${esc(dishName(v.dish))}</td>
+          <td class="t-act"><button class="btn small" type="button" data-fill="${esc(v.id)}">Wijzig</button> <button class="btn small ghost danger" type="button" data-del="${esc(v.id)}">Wis</button></td></tr>`).join('')}
+        </tbody></table></div>` : '<p class="empty">Nog geen stemmen.</p>'}
+    </section>
+    <footer><p>Beheer is enkel bereikbaar met de beheercode. Uitloggen wist de code uit dit tabblad.</p></footer>`;
+
+  const run = async (fn, args, okMsg) => {
+    try { await rpc(fn, { p_code: ADMIN_CODE, ...args }); toast(okMsg); await loadAdmin(); }
+    catch (e) { toast(errText(e), true); if (e.code === 'forbidden') loadAdmin(); }
+  };
+
+  $('#a-refresh').onclick = () => loadAdmin().then(() => toast('Bijgewerkt.'));
+  $('#a-logout').onclick = () => { ADMIN_CODE = null; sdel('pst-admin', 'session'); adminLogin(); };
+  $('#a-copy').onclick = () => copyOverview(rank, sel, votes);
+  $('#a-deadline-save').onclick = () => {
+    const v = $('#a-deadline').value;
+    if (!v) return toast('Kies eerst een datum en uur.', true);
+    run('admin_set_deadline', { p_deadline: new Date(v).toISOString() }, 'Deadline opgeslagen.');
+  };
+  const clr = $('#a-deadline-clear');
+  if (clr) clr.onclick = () => run('admin_set_deadline', { p_deadline: null }, 'Deadline gewist: stemming staat open.');
+  $('#a-picks').onchange = e => {
+    if (e.target.checked) adm.finalPick.add(e.target.value); else adm.finalPick.delete(e.target.value);
+    adm.pickTouched = true;
+    $('#a-pick-n').textContent = adm.finalPick.size;
+  };
+  $('#a-final-save').onclick = () => {
+    const picks = [...adm.finalPick];
+    if (!picks.length) return toast('Vink minstens één gerecht aan.', true);
+    if (picks.length !== MAX_DISHES && !confirm(`Je hebt ${picks.length} gerechten aangevinkt in plaats van ${MAX_DISHES}. Toch publiceren?`)) return;
+    picks.sort((a, b) => (countOf[b] || 0) - (countOf[a] || 0) || byName(dishName(a), dishName(b)));
+    adm.pickTouched = false;
+    run('admin_set_final', { p_dishes: picks }, 'Definitieve keuze gepubliceerd.');
+  };
+  const fc = $('#a-final-clear');
+  if (fc) fc.onclick = () => {
+    if (!confirm('Publicatie van de definitieve keuze intrekken?')) return;
+    adm.pickTouched = false;
+    run('admin_set_final', { p_dishes: null }, 'Publicatie ingetrokken.');
+  };
+  $('#a-showall').onclick = () => { adm.showAll = !adm.showAll; renderAdmin(); };
+  $('#a-cast').onclick = () => {
+    const name = $('#a-name').value.trim();
+    if (norm(name).length < 2) return toast('Vul een naam in.', true);
+    run('admin_cast_vote', { p_name: name, p_dish: $('#a-dish').value }, `Stem voor ${name} opgeslagen.`);
+  };
+  $('#admin-root').querySelector('table')?.addEventListener('click', e => {
+    const del = e.target.closest('[data-del]');
+    const fill = e.target.closest('[data-fill]');
+    const v = votes.find(x => x.id === (del || fill)?.dataset[del ? 'del' : 'fill']);
+    if (!v) return;
+    if (del) {
+      if (confirm(`Stem van ${v.name} (${dishName(v.dish)}) wissen?`)) run('admin_delete_vote', { p_id: v.id }, `Stem van ${v.name} gewist.`);
+    } else {
+      $('#a-name').value = v.name;
+      $('#a-dish').value = v.dish;
+      $('#a-name').closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+async function copyOverview(rank, sel, votes) {
+  const stamp = fmtShort.format(new Date());
+  const lines = [`Pastinaak: stand op ${stamp} (${votes.length} stemmen)`, ''];
+  rank.forEach((r, i) => {
+    if (i === MAX_DISHES && !(adm.data.final || []).length) lines.push('--- grens 6 gerechten ---');
+    lines.push(`${i + 1}. ${dishName(r.dish)}: ${r.count}× (${r.names.join(', ')})${sel.set.has(r.dish) ? '' : ' [buiten selectie]'}`);
+  });
+  const text = lines.join('\n');
+  try { await navigator.clipboard.writeText(text); toast('Overzicht gekopieerd.'); }
+  catch { prompt('Kopieer het overzicht:', text); }
+}
+
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
+function route() {
+  const isAdmin = location.hash === '#admin';
+  $('#voter').hidden = isAdmin;
+  $('#admin').hidden = !isAdmin;
+  document.body.classList.toggle('has-bar', !isAdmin && !$('#bar').hidden);
+  window.scrollTo(0, 0);
+  if (isAdmin) loadAdmin(); else loadVoter();
+}
+
+const savedName = sget('pst-name');
+if (savedName) $('#name').value = savedName;
+renderMenu();
+route();
+window.addEventListener('hashchange', route);
+setInterval(() => {
+  if (document.visibilityState === 'visible' && location.hash !== '#admin' && !state.busy) loadVoter();
+}, 30000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && location.hash !== '#admin') loadVoter();
+});
+</script>
+</body>
+</html>
