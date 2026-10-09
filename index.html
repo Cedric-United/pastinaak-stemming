@@ -270,6 +270,7 @@ td .meta { display: block; color: var(--muted); font-size: 12.5px; }
 
     <section class="card" id="mine" hidden>
       <h2>Gestemd vanop dit toestel</h2>
+      <p class="warn" id="mine-gone" style="margin-top:10px" hidden></p>
       <ul class="mine-list" id="mine-list"></ul>
     </section>
 
@@ -299,7 +300,7 @@ td .meta { display: block; color: var(--muted); font-size: 12.5px; }
     <div id="menu" role="radiogroup" aria-label="Hoofdgerechten"></div>
 
     <footer>
-      <p>Gerechten en prijzen volgens de menukaart op pastinaak.be (geraadpleegd op 1 oktober 2026). Sauzen bij vlees (béarnaise, peperroom, champignonroom …) kosten een supplement.</p>
+      <p>Gerechten en prijzen volgens de menukaart op pastinaak.be (bijgewerkt op 9 oktober 2026). Sauzen bij vlees (béarnaise, peperroom, champignonroom …) kosten een supplement.</p>
       <p><a href="#admin">Beheer</a></p>
     </footer>
   </main>
@@ -338,19 +339,13 @@ const DEMO = new URLSearchParams(location.search).has('demo');
 // ---------------------------------------------------------------------------
 const WARM = 'Met warme groenten i.p.v. sla: + € 3';
 const MENU = [
-  { cat: 'Mosselen', note: 'Suggestie van het seizoen', items: [
-    ['mos-natuur', 'Mosselen natuur', 30.5],
-    ['mos-witte-wijn', 'Mosselen witte wijn', 31.0],
-    ['mos-look', 'Mosselen look (room)', 31.5],
-    ['mos-curry', 'Mosselen curryroom', 31.5],
-    ['mos-noors', 'Mosselen op Noorse wijze', 32.0],
-    ['mos-pastinaak', 'Mosselen ‘Pastinaak’', 32.0],
-  ]},
-  { cat: 'Suggesties', note: 'Wisselende suggesties van de chef', items: [
-    ['sug-zeebaars', 'Zeebaars met duo van bloemkool & courgette', 32.5, 'Saffraansaus'],
-    ['sug-varkensrug', 'Varkensrugfilet Duke of Berkshire', 33.0, 'Mosterd-tijmsaus'],
-    ['sug-spaghetti', 'Spaghetti met spek & broccoli-parmezaansaus', 24.0, 'Basilicum & look'],
-    ['sug-salade-kip-mango', 'Salade met gerookte kip & mango', 25.0],
+  { cat: 'Suggesties', note: 'Herfst- en wildsuggesties van de chef', items: [
+    ['sug-fazant', 'Fazantfilet in een jasje van spek', 33.5, 'Savooikool & portosaus'],
+    ['sug-hertenkalf', 'Hertenkalffilet met Grand-veneursaus', 39.9, 'Herfstgarnituur'],
+    ['sug-wijting', 'Wijtingfilet met butternut & witte wijnsaus', 32.0],
+    ['sug-wildstoverij', 'Wildstoverij met herfstgarnituur', 33.5],
+    ['sug-pasta-boszwammen', 'Pasta met boszwammen & spek', 24.0],
+    ['sug-salade-rode-biet', 'Salade met rode biet & geitenkaas', 23.5],
   ]},
   { cat: 'Vis', items: [
     ['vis-zeetong', 'Gebakken zeetong met citroenboter & tartaar', 39.0],
@@ -389,10 +384,31 @@ const MENU = [
     ['veg-rijst', 'Rijstschotel met wokgroenten', 20.5],
   ]},
 ];
+// Van de kaart verdwenen bij de menuwijziging van 9/10/2026. Ze blijven bekend
+// zodat bestaande stemmen leesbaar blijven, maar je kan er niet meer op stemmen.
+const RETIRED = [
+  { cat: 'Mosselen', items: [
+    ['mos-natuur', 'Mosselen natuur'],
+    ['mos-witte-wijn', 'Mosselen witte wijn'],
+    ['mos-look', 'Mosselen look (room)'],
+    ['mos-curry', 'Mosselen curryroom'],
+    ['mos-noors', 'Mosselen op Noorse wijze'],
+    ['mos-pastinaak', 'Mosselen ‘Pastinaak’'],
+  ]},
+  { cat: 'Suggesties', items: [
+    ['sug-zeebaars', 'Zeebaars met duo van bloemkool & courgette'],
+    ['sug-varkensrug', 'Varkensrugfilet Duke of Berkshire'],
+    ['sug-spaghetti', 'Spaghetti met spek & broccoli-parmezaansaus'],
+    ['sug-salade-kip-mango', 'Salade met gerookte kip & mango'],
+  ]},
+];
 const DISH = {};
 for (const c of MENU) for (const [id, name, price, detail] of c.items) DISH[id] = { id, name, price, detail, cat: c.cat };
+for (const c of RETIRED) for (const [id, name] of c.items) DISH[id] = { id, name, cat: c.cat, retired: true };
+const isRetired = id => !!(DISH[id] && DISH[id].retired);
+const onMenu = id => !!DISH[id] && !DISH[id].retired;
 const dishName = id => (DISH[id] ? DISH[id].name : `Onbekend gerecht (${id})`);
-const dishCat = id => (DISH[id] ? DISH[id].cat : '');
+const dishCat = id => (DISH[id] ? (DISH[id].retired ? `${DISH[id].cat} · niet meer op de kaart` : DISH[id].cat) : '');
 
 // ---------------------------------------------------------------------------
 // Hulpjes
@@ -485,9 +501,9 @@ async function rpc(fn, args = {}) {
 const demoDb = (() => {
   const now = Date.now();
   const seed = [
-    ['Jan', 'vlees-steak'], ['An', 'mos-natuur'], ['Marie', 'vis-zalm'], ['Luc', 'vlees-steak'],
-    ['Sofie', 'sal-caesar'], ['Tom', 'mos-pastinaak'], ['Els', 'vis-zalm'], ['Bart', 'vlees-filet-pur'],
-    ['Lotte', 'pasta-lasagne'], ['Wim', 'mos-natuur'], ['Greet', 'vis-zeetong'], ['Koen', 'vlees-steak'],
+    ['Jan', 'vlees-steak'], ['An', 'sug-wildstoverij'], ['Marie', 'vis-zalm'], ['Luc', 'vlees-steak'],
+    ['Sofie', 'sal-caesar'], ['Tom', 'sug-varkensrug'], ['Els', 'vis-zalm'], ['Bart', 'vlees-filet-pur'],
+    ['Lotte', 'pasta-lasagne'], ['Wim', 'sug-wildstoverij'], ['Greet', 'vis-zeetong'], ['Koen', 'vlees-steak'],
     ['Nina', 'veg-pasta'], ['Pieter', 'sal-caesar'],
   ];
   return {
@@ -600,7 +616,7 @@ function renderVoter() {
 function renderStatus() {
   const s = state.status;
   if (!s) return;
-  const chosen = s.chosen || [];
+  const chosen = (s.chosen || []).filter(onMenu);
   let deadline;
   if (s.closed) deadline = `<div class="stat closed"><b>Afgesloten</b><span>sinds ${esc(fmtDate.format(new Date(s.deadline)))}</span></div>`;
   else if (s.deadline) deadline = `<div class="stat"><b>${esc(timeLeft(s.deadline))}</b><span>stemmen tot ${esc(fmtDate.format(new Date(s.deadline)))}</span></div>`;
@@ -678,10 +694,15 @@ function renderMine() {
   const box = $('#mine');
   if (!state.mine.length) { box.hidden = true; return; }
   const closed = !!state.status?.closed;
+  const gone = state.mine.filter(v => isRetired(v.dish));
+  $('#mine-gone').hidden = closed || !gone.length;
+  $('#mine-gone').textContent = gone.length
+    ? `Het restaurant heeft de kaart aangepast: ${gone.map(v => dishName(v.dish)).filter((n, i, a) => a.indexOf(n) === i).join(', ')} ${gone.length === 1 ? 'staat' : 'staan'} er niet meer op. Tik bij ${gone.map(v => v.name).join(', ')} op “Wijzig” en kies een ander gerecht.`
+    : '';
   $('#mine-list').innerHTML = state.mine.map((v, i) => `
     <li>
-      <div class="who"><b>${esc(v.name)}</b><span>${esc(dishName(v.dish))}</span></div>
-      ${closed ? '' : `<button type="button" class="btn small" data-edit="${i}">Wijzig</button>
+      <div class="who"><b>${esc(v.name)}</b><span>${esc(dishName(v.dish))}${isRetired(v.dish) ? ' <span class="badge chosen">Niet meer op de kaart</span>' : ''}</span></div>
+      ${closed ? '' : `<button type="button" class="btn small${isRetired(v.dish) ? ' primary' : ''}" data-edit="${i}">Wijzig</button>
       <button type="button" class="btn small ghost danger" data-withdraw="${i}">Trek in</button>`}
     </li>`).join('');
   box.hidden = false;
@@ -741,7 +762,7 @@ function renderBar() {
 
 function syncSelectionWithName(force) {
   const mine = currentMine();
-  if (mine && (force || !state.selected)) state.selected = mine.dish;
+  if (mine && (force || !state.selected)) state.selected = onMenu(mine.dish) ? mine.dish : null;
 }
 
 function showFormMsg(msg) {
@@ -833,8 +854,8 @@ $('#name').addEventListener('input', () => {
   hideReplace();
   const mine = currentMine();
   if (mine) {
-    state.selected = mine.dish;
-    for (const el of document.querySelectorAll('.dish')) el.setAttribute('aria-checked', String(el.dataset.id === mine.dish));
+    state.selected = onMenu(mine.dish) ? mine.dish : null;
+    for (const el of document.querySelectorAll('.dish')) el.setAttribute('aria-checked', String(el.dataset.id === state.selected));
   }
   renderBar();
 });
@@ -853,7 +874,7 @@ $('#mine-list').addEventListener('click', e => {
   if (ed) {
     const v = state.mine[+ed.dataset.edit];
     $('#name').value = v.name;
-    state.selected = v.dish;
+    state.selected = onMenu(v.dish) ? v.dish : null;
     state.filter = 'all';
     for (const el of document.querySelectorAll('.chip')) el.setAttribute('aria-pressed', String(el.dataset.filter === 'all'));
     renderMenu(); renderBar();
@@ -933,6 +954,7 @@ function renderAdmin() {
   const sel = selection(rank, final);
   const happy = votes.filter(v => sel.set.has(v.dish));
   const outside = votes.filter(v => !sel.set.has(v.dish)).sort((a, b) => byName(a.name, b.name));
+  const goneVotes = votes.filter(v => !onMenu(v.dish)).sort((a, b) => byName(a.name, b.name));
   const tieCount = rank.length > MAX_DISHES && rank[MAX_DISHES - 1].count === rank[MAX_DISHES].count ? rank[MAX_DISHES - 1].count : null;
   const tied = tieCount !== null ? rank.filter(r => r.count === tieCount) : [];
   const max = rank.length ? rank[0].count : 1;
@@ -974,6 +996,8 @@ function renderAdmin() {
       <div class="tile"><b>${rank.length}</b><span>verschillende gerechten</span></div>
       <div class="tile"><b>${happy.length}/${votes.length}</b><span>krijgt favoriet (${esc(sel.label)})</span></div>
     </div>
+
+    ${goneVotes.length ? `<p class="warn"><b>${goneVotes.length} ${goneVotes.length === 1 ? 'stem staat' : 'stemmen staan'} op een gerecht dat niet meer op de kaart staat:</b> ${esc(goneVotes.map(v => `${v.name} (${dishName(v.dish)})`).join(', '))}. Wie de pagina opnieuw opent vanop hetzelfde toestel, krijgt de vraag om een ander gerecht te kiezen. Anderen contacteer je best zelf, of pas hun stem aan via “Stem namens iemand”.</p>` : ''}
 
     ${tied.length && !final.length ? `<p class="warn"><b>Gelijkstand op plaats ${MAX_DISHES}:</b> ${esc(tied.map(r => dishName(r.dish)).join(', '))} (elk ${tieCount} ${tieCount === 1 ? 'stem' : 'stemmen'}). Jij beslist welke erin gaan via “Definitieve keuze”.</p>` : ''}
 
